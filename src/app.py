@@ -1,10 +1,3 @@
-"""
-High School Management System API
-
-A super simple FastAPI application that allows students to view and sign up
-for extracurricular activities at Mergington High School.
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -16,10 +9,9 @@ app = FastAPI(title="Mergington High School API",
 
 # Mount the static files directory
 current_dir = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
-          "static")), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent, "static")), name="static")
 
-# In-memory activity database
+# In-memory activity database (Atualizado com mais atividades conforme pedido)
 activities = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
@@ -38,20 +30,23 @@ activities = {
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
-    }
+    },
+    # Novas atividades sugeridas pelo Copilot:
+    "Basketball": {"description": "Team sports and competition", "schedule": "Weekdays 4pm", "max_participants": 15, "participants": []},
+    "Soccer": {"description": "Outdoor football matches", "schedule": "Saturdays 10am", "max_participants": 22, "participants": []},
+    "Painting": {"description": "Creative arts and techniques", "schedule": "Mondays 3pm", "max_participants": 10, "participants": []},
+    "Drama Club": {"description": "Acting and theater production", "schedule": "Wednesdays 5pm", "max_participants": 12, "participants": []},
+    "Debate Team": {"description": "Public speaking and argumentation", "schedule": "Thursdays 4pm", "max_participants": 8, "participants": []},
+    "Robotics": {"description": "Building and programming robots", "schedule": "Tuesdays 4pm", "max_participants": 10, "participants": []}
 }
-#
-
 
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
 
-
 @app.get("/activities")
 def get_activities():
     return activities
-
 
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
@@ -63,10 +58,9 @@ def signup_for_activity(activity_name: str, email: str):
     # Get the specific activity
     activity = activities[activity_name]
 
-    # Validate student is not already signed up
-    if activity_name not in activities:
-        raise HTTPException(status_code=404, detail="Activity not found")
-
+    # CORREÇÃO AQUI: Validate student is not already signed up
+    if email in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student already signed up for this activity")
 
     # Add student
     activity["participants"].append(email)
